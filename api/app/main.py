@@ -4,9 +4,11 @@ from fastapi import FastAPI
 
 from app.database import get_connection
 from app.routers.employees import router as employees_router
+from app.routers.evaluations import router as evaluations_router
 
 app = FastAPI(title="Blick API")
 app.include_router(employees_router)
+app.include_router(evaluations_router)
 
 @app.get("/health")
 def health() -> dict[str, str]:
