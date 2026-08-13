@@ -72,6 +72,12 @@ def get_current_evaluation(employee_id: int, viewer_id: int):
     """Retorna a avaliação vigente da semana atual, priorizando o líder
     mais próximo do topo da hierarquia quando há mais de uma."""
     with get_connection() as conn:
+        try:
+            ensure_can_evaluate(conn, viewer_id, employee_id)
+        except SelfEvaluationError:
+            raise HTTPException(status.HTTP_403_FORBIDDEN, "Não é possível ver sua própria avaliação.")
+        except NotSubordinateError:
+            raise HTTPException(status.HTTP_403_FORBIDDEN, "Você só pode ver avaliações dos seus subordinados.")
 
         candidates = conn.execute(
             """
@@ -109,18 +115,24 @@ def get_current_evaluation(employee_id: int, viewer_id: int):
 
 
 @router.get("/{employee_id}/evaluations/history", response_model=list[EvaluationHistoryOut])
-def get_evaluation_history(employee_id: int):
+def get_evaluation_history(employee_id: int, viewer_id: int):
     """Lista todas as avaliações já recebidas por esse funcionário, mais recentes primeiro."""
     with get_connection() as conn:
+        try:
+                ensure_can_evaluate(conn, viewer_id, employee_id)
+        except SelfEvaluationError:
+            raise HTTPException(status.HTTP_403_FORBIDDEN, "Não é possível ver sua própria avaliação.")
+        except NotSubordinateError:
+            raise HTTPException(status.HTTP_403_FORBIDDEN, "Você só pode ver avaliações dos seus subordinados.")
         rows = conn.execute(
-            """
-            SELECT e.id, e.leader_id, emp.name AS leader_name, e.week_key
-            FROM evaluation e
-            INNER JOIN employee emp ON emp.id = e.leader_id
-            WHERE e.employee_id = %(employee_id)s
-            ORDER BY e.created_at DESC
-            """,
-            {"employee_id": employee_id},
+        """
+        SELECT e.id, e.leader_id, emp.name AS leader_name, e.week_key
+        FROM evaluation e
+        INNER JOIN employee emp ON emp.id = e.leader_id
+        WHERE e.employee_id = %(employee_id)s
+        ORDER BY e.created_at DESC
+        """,
+        {"employee_id": employee_id},
         ).fetchall()
 
         result = []
