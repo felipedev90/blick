@@ -5,10 +5,15 @@ from app.core.hierarchy import (
     NotSubordinateError,
     SelfEvaluationError,
     ensure_can_evaluate,
+    get_depth_from_top,
 )
-from app.core.questions import QUESTION_WEIGHTS
+from app.core.questions import QUESTION_WEIGHTS, calculate_weighted_score
 from app.database import get_connection
-from app.schemas.evaluation import EvaluationIn
+from app.schemas.evaluation import (
+    EvaluationHistoryOut,
+    EvaluationIn,
+    EvaluationSummaryOut,
+)
 
 router = APIRouter(prefix="/employees", tags=["evaluations"])
 
@@ -61,3 +66,76 @@ def create_evaluation(employee_id: int, payload: EvaluationIn) -> dict[str, int]
             )
 
     return {"id": evaluation_id}
+
+@router.get("/{employee_id}/evaluations/current", response_model=EvaluationSummaryOut | None)
+def get_current_evaluation(employee_id: int, viewer_id: int):
+    """Retorna a avaliação vigente da semana atual, priorizando o líder
+    mais próximo do topo da hierarquia quando há mais de uma."""
+    with get_connection() as conn:
+
+        candidates = conn.execute(
+            """
+            SELECT e.id, e.leader_id, emp.name AS leader_name, e.week_key
+            FROM evaluation e
+            INNER JOIN employee emp ON emp.id = e.leader_id
+            WHERE e.employee_id = %(employee_id)s
+              AND e.week_key = TO_CHAR(now(), 'IYYY-IW')
+            """,
+            {"employee_id": employee_id},
+        ).fetchall()
+
+        if not candidates:
+            return None
+
+        ranked = sorted(
+            candidates,
+            key=lambda c: get_depth_from_top(conn, c["leader_id"]),
+        )
+        top = ranked[0]
+
+        answers = conn.execute(
+            "SELECT question_key, score FROM evaluation_answer WHERE evaluation_id = %(id)s",
+            {"id": top["id"]},
+        ).fetchall()
+
+        return EvaluationSummaryOut(
+            id=top["id"],
+            leader_id=top["leader_id"],
+            leader_name=top["leader_name"],
+            week_key=top["week_key"],
+            weighted_score=calculate_weighted_score(answers),
+            answers=answers,
+        )
+
+
+@router.get("/{employee_id}/evaluations/history", response_model=list[EvaluationHistoryOut])
+def get_evaluation_history(employee_id: int):
+    """Lista todas as avaliações já recebidas por esse funcionário, mais recentes primeiro."""
+    with get_connection() as conn:
+        rows = conn.execute(
+            """
+            SELECT e.id, e.leader_id, emp.name AS leader_name, e.week_key
+            FROM evaluation e
+            INNER JOIN employee emp ON emp.id = e.leader_id
+            WHERE e.employee_id = %(employee_id)s
+            ORDER BY e.created_at DESC
+            """,
+            {"employee_id": employee_id},
+        ).fetchall()
+
+        result = []
+        for row in rows:
+            answers = conn.execute(
+                "SELECT question_key, score FROM evaluation_answer WHERE evaluation_id = %(id)s",
+                {"id": row["id"]},
+            ).fetchall()
+            result.append(
+                EvaluationHistoryOut(
+                    id=row["id"],
+                    leader_id=row["leader_id"],
+                    leader_name=row["leader_name"],
+                    week_key=row["week_key"],
+                    weighted_score=calculate_weighted_score(answers),
+                )
+            )
+        return result
