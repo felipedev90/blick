@@ -5,8 +5,6 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
-    paths:
-      - "web/**"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -46,3 +44,29 @@ jobs:
 
       - name: Build
         run: npm run build
+
+  api-quality:
+    name: API quality checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: api
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Poetry
+        run: pipx install poetry
+
+      - name: Install dependencies
+        run: poetry install --no-root
+
+      - name: Lint
+        run: poetry run ruff check .
