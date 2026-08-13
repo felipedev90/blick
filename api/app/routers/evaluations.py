@@ -5,11 +5,15 @@ from app.core.hierarchy import (
     NotSubordinateError,
     SelfEvaluationError,
     ensure_can_evaluate,
-    get_depth_from_top
+    get_depth_from_top,
 )
 from app.core.questions import QUESTION_WEIGHTS, calculate_weighted_score
 from app.database import get_connection
-from app.schemas.evaluation import EvaluationIn, EvaluationHistoryOut, EvaluationSummaryOut
+from app.schemas.evaluation import (
+    EvaluationHistoryOut,
+    EvaluationIn,
+    EvaluationSummaryOut,
+)
 
 router = APIRouter(prefix="/employees", tags=["evaluations"])
 
