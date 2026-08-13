@@ -22,3 +22,17 @@ def is_subordinate(conn: Connection, leader_id: int, employee_id: int) -> bool:
         query, {"leader_id": leader_id, "employee_id": employee_id}
     ).fetchone()
     return result is not None
+
+class SelfEvaluationError(Exception):
+    """Levantado quando um líder tenta avaliar a si mesmo."""
+
+class NotSubordinateError(Exception):
+    """Levantado quando o avaliado não está na hierarquia do líder."""
+
+
+def ensure_can_evaluate(conn: Connection, leader_id: int, employee_id: int) -> None:
+    """Valida se leader_id pode avaliar employee_id. Levanta exceção se não puder."""
+    if leader_id == employee_id:
+        raise SelfEvaluationError()
+    if not is_subordinate(conn, leader_id, employee_id):
+        raise NotSubordinateError()
