@@ -6,4 +6,5 @@ export type Employee = {
 
 export type TeamMember = Employee & {
   depth: number
+  parentId: number | null
 }
