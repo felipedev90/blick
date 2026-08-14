@@ -21,7 +21,7 @@ def create_evaluation(employee_id: int, payload: EvaluationIn) -> dict[str, int]
     answered_keys = {a.question_key for a in payload.answers}
     if answered_keys != set(QUESTION_WEIGHTS.keys()):
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail="Todas as perguntas precisam ser respondidas, sem repetição.",
         )
 
