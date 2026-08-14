@@ -1,10 +1,72 @@
 @import 'tailwindcss';
 
+:root {
+  --bg: #14171c;
+  --surface: #1b1f26;
+  --border: #2a2f38;
+  --text: #e7e4dd;
+  --text-muted: #8b909b;
+  --accent: #c89b4a;
+  color-scheme: dark;
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme]) {
+    --bg: #f1efea;
+    --surface: #ffffff;
+    --border: #dedbd3;
+    --text: #1b1f26;
+    --text-muted: #5b616b;
+    --accent: #a87a2e;
+    color-scheme: light;
+  }
+}
+
+[data-theme='dark'] {
+  --bg: #14171c;
+  --surface: #1b1f26;
+  --border: #2a2f38;
+  --text: #e7e4dd;
+  --text-muted: #8b909b;
+  --accent: #c89b4a;
+  color-scheme: dark;
+}
+
+[data-theme='light'] {
+  --bg: #f1efea;
+  --surface: #ffffff;
+  --border: #dedbd3;
+  --text: #1b1f26;
+  --text-muted: #5b616b;
+  --accent: #a87a2e;
+  color-scheme: light;
+}
+
 @theme inline {
-  /* Add your design tokens here */
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-border: var(--border);
+  --color-text: var(--text);
+  --color-text-muted: var(--text-muted);
+  --color-accent: var(--accent);
+  --font-sans: var(--font-instrument-sans);
+  --font-mono: var(--font-plex-mono);
+}
+
+* {
+  box-sizing: border-box;
 }
 
 body {
-  font-family: system-ui, sans-serif;
-  -webkit-font-smoothing: antialiased;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  body {
+    transition:
+      background-color 200ms ease,
+      color 200ms ease;
+  }
 }
