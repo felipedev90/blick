@@ -38,22 +38,27 @@ def ensure_can_evaluate(conn: Connection, leader_id: int, employee_id: int) -> N
         raise NotSubordinateError()
     
     
-def get_depth_from_top(conn: Connection, leader_id: int) -> int:
-    """Calcula quantos níveis esse leader_id está abaixo do topo da hierarquia geral.
-    Usado para decidir qual avaliação prevalece quando há mais de uma na mesma semana."""
+def get_depths_from_top(conn: Connection, leader_ids: list[int]) -> dict[int, int]:
+    """Calcula, em uma única consulta, a profundidade de cada leader_id
+    a partir da raiz da hierarquia (quem não tem líder = depth 0).
+    Usado para desempate entre avaliações."""
     query = """
-        WITH RECURSIVE ancestry AS (
-            SELECT leader_id, lead_id, 0 AS depth
-            FROM leader_lead
-            WHERE lead_id = %(leader_id)s
+        WITH RECURSIVE depth_tree AS (
+            SELECT e.id AS employee_id, 0 AS depth
+            FROM employee e
+            WHERE NOT EXISTS (
+                SELECT 1 FROM leader_lead ll WHERE ll.lead_id = e.id
+            )
 
             UNION ALL
 
-            SELECT ll.leader_id, ll.lead_id, a.depth + 1
+            SELECT ll.lead_id, dt.depth + 1
             FROM leader_lead ll
-            INNER JOIN ancestry a ON ll.lead_id = a.leader_id
+            INNER JOIN depth_tree dt ON ll.leader_id = dt.employee_id
         )
-        SELECT COALESCE(MAX(depth) + 1, 0) AS depth FROM ancestry
+        SELECT employee_id AS id, depth
+        FROM depth_tree
+        WHERE employee_id = ANY(%(leader_ids)s)
     """
-    result = conn.execute(query, {"leader_id": leader_id}).fetchone()
-    return result["depth"]
+    rows = conn.execute(query, {"leader_ids": leader_ids}).fetchall()
+    return {row["id"]: row["depth"] for row in rows}
