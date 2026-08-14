@@ -11,6 +11,7 @@ export type RawEmployee = {
 
 export type RawTeamMember = RawEmployee & {
   depth: number
+  parent_id: number
 }
 
 type RawAnswer = {
@@ -40,7 +41,7 @@ export function toEmployee(raw: RawEmployee): Employee {
 }
 
 export function toTeamMember(raw: RawTeamMember): TeamMember {
-  return { ...toEmployee(raw), depth: raw.depth }
+  return { ...toEmployee(raw), depth: raw.depth, parentId: raw.parent_id }
 }
 
 function toAnswer(raw: RawAnswer): Answer {
