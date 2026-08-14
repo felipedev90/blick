@@ -1,7 +1,11 @@
+import logging
+
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
 from app.core.hierarchy import NotSubordinateError, SelfEvaluationError
+
+logger = logging.getLogger(__name__)
 
 
 def register_exception_handlers(app: FastAPI) -> None:
@@ -14,3 +18,12 @@ def register_exception_handlers(app: FastAPI) -> None:
     @app.exception_handler(NotSubordinateError)
     def handle_not_subordinate(request: Request, exc: NotSubordinateError) -> JSONResponse:
         return JSONResponse(status_code=403, content={"detail": "Funcionário fora da sua hierarquia."})
+    
+    @app.exception_handler(Exception)
+    def handle_unexpected_error(request: Request, exc: Exception) -> JSONResponse:
+        """Captura qualquer erro não previsto, evitando vazar stack trace ao cliente."""
+        logger.exception("Erro não tratado em %s %s", request.method, request.url.path)
+        return JSONResponse(
+            status_code=500,
+            content={"detail": "Erro interno do servidor."},
+        )
