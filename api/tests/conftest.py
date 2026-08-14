@@ -16,6 +16,7 @@ def conn():
 def clean_evaluations(conn):
     """Remove avaliações dos funcionários reservados pra teste, antes e depois,
     pra suíte poder rodar quantas vezes for preciso sem esbarrar na constraint semanal."""
+
     def _clean():
         conn.execute(
             "DELETE FROM evaluation WHERE employee_id = ANY(%(ids)s)",

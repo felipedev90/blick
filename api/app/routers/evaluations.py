@@ -58,6 +58,7 @@ def create_evaluation(employee_id: int, payload: EvaluationIn) -> dict[str, int]
 
     return {"id": evaluation_id}
 
+
 @router.get("/{employee_id}/evaluations/current", response_model=EvaluationSummaryOut)
 def get_current_evaluation(employee_id: int, viewer_id: int):
     """Retorna a avaliação vigente da semana atual, priorizando o líder
@@ -99,7 +100,9 @@ def get_current_evaluation(employee_id: int, viewer_id: int):
         )
 
 
-@router.get("/{employee_id}/evaluations/history", response_model=list[EvaluationHistoryOut])
+@router.get(
+    "/{employee_id}/evaluations/history", response_model=list[EvaluationHistoryOut]
+)
 def get_evaluation_history(employee_id: int, viewer_id: int):
     """Lista todas as avaliações já recebidas por esse funcionário, mais recentes primeiro."""
     with get_connection() as conn:

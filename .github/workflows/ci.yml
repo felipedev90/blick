@@ -82,6 +82,12 @@ jobs:
       - name: Install dependencies
         run: poetry install --no-root
 
+      - name: Check formatting
+        run: poetry run ruff format --check .
+
+      - name: Lint
+        run: poetry run ruff check .
+
       - name: Lint
         run: poetry run ruff check .
 

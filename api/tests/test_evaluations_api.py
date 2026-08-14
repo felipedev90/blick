@@ -47,9 +47,7 @@ def test_non_subordinate_evaluation_is_rejected(clean_evaluations):
 
 
 def test_incomplete_answers_are_rejected(clean_evaluations):
-    response = create_evaluation(
-        leader_id=6, employee_id=15, answers=[FULL_ANSWERS[0]]
-    )
+    response = create_evaluation(leader_id=6, employee_id=15, answers=[FULL_ANSWERS[0]])
     assert response.status_code == 422
 
 

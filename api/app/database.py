@@ -1,4 +1,4 @@
-""" Abre conexão psycopg com o Postgres"""
+"""Abre conexão psycopg com o Postgres"""
 
 import psycopg
 from psycopg.rows import dict_row
