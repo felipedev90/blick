@@ -1,12 +1,7 @@
 from fastapi import APIRouter, HTTPException, status
 from psycopg.errors import UniqueViolation
 
-from app.core.hierarchy import (
-    NotSubordinateError,
-    SelfEvaluationError,
-    ensure_can_evaluate,
-    get_depth_from_top,
-)
+from app.core.hierarchy import ensure_can_evaluate, get_depths_from_top
 from app.core.questions import QUESTION_WEIGHTS, calculate_weighted_score
 from app.database import get_connection
 from app.schemas.evaluation import (
@@ -30,12 +25,7 @@ def create_evaluation(employee_id: int, payload: EvaluationIn) -> dict[str, int]
         )
 
     with get_connection() as conn:
-        try:
-            ensure_can_evaluate(conn, payload.leader_id, employee_id)
-        except SelfEvaluationError:
-            raise HTTPException(status.HTTP_403_FORBIDDEN, "Não é possível se autoavaliar.")
-        except NotSubordinateError:
-            raise HTTPException(status.HTTP_403_FORBIDDEN, "Funcionário fora da sua hierarquia.")
+        ensure_can_evaluate(conn, payload.leader_id, employee_id)
 
         try:
             evaluation_id = conn.execute(
@@ -72,12 +62,7 @@ def get_current_evaluation(employee_id: int, viewer_id: int):
     """Retorna a avaliação vigente da semana atual, priorizando o líder
     mais próximo do topo da hierarquia quando há mais de uma."""
     with get_connection() as conn:
-        try:
-            ensure_can_evaluate(conn, viewer_id, employee_id)
-        except SelfEvaluationError:
-            raise HTTPException(status.HTTP_403_FORBIDDEN, "Não é possível ver sua própria avaliação.")
-        except NotSubordinateError:
-            raise HTTPException(status.HTTP_403_FORBIDDEN, "Você só pode ver avaliações dos seus subordinados.")
+        ensure_can_evaluate(conn, viewer_id, employee_id)
 
         candidates = conn.execute(
             """
@@ -93,10 +78,9 @@ def get_current_evaluation(employee_id: int, viewer_id: int):
         if not candidates:
             return None
 
-        ranked = sorted(
-            candidates,
-            key=lambda c: get_depth_from_top(conn, c["leader_id"]),
-        )
+        leader_ids = [c["leader_id"] for c in candidates]
+        depths = get_depths_from_top(conn, leader_ids)
+        ranked = sorted(candidates, key=lambda c: depths[c["leader_id"]])
         top = ranked[0]
 
         answers = conn.execute(
@@ -118,36 +102,44 @@ def get_current_evaluation(employee_id: int, viewer_id: int):
 def get_evaluation_history(employee_id: int, viewer_id: int):
     """Lista todas as avaliações já recebidas por esse funcionário, mais recentes primeiro."""
     with get_connection() as conn:
-        try:
-                ensure_can_evaluate(conn, viewer_id, employee_id)
-        except SelfEvaluationError:
-            raise HTTPException(status.HTTP_403_FORBIDDEN, "Não é possível ver sua própria avaliação.")
-        except NotSubordinateError:
-            raise HTTPException(status.HTTP_403_FORBIDDEN, "Você só pode ver avaliações dos seus subordinados.")
+        ensure_can_evaluate(conn, viewer_id, employee_id)
+
         rows = conn.execute(
-        """
-        SELECT e.id, e.leader_id, emp.name AS leader_name, e.week_key
-        FROM evaluation e
-        INNER JOIN employee emp ON emp.id = e.leader_id
-        WHERE e.employee_id = %(employee_id)s
-        ORDER BY e.created_at DESC
-        """,
-        {"employee_id": employee_id},
+            """
+            SELECT e.id, e.leader_id, emp.name AS leader_name, e.week_key,
+                   a.question_key, a.score
+            FROM evaluation e
+            INNER JOIN employee emp ON emp.id = e.leader_id
+            INNER JOIN evaluation_answer a ON a.evaluation_id = e.id
+            WHERE e.employee_id = %(employee_id)s
+            ORDER BY e.created_at DESC, e.id
+            """,
+            {"employee_id": employee_id},
         ).fetchall()
 
-        result = []
+        grouped: dict[int, dict] = {}
+        order: list[int] = []
         for row in rows:
-            answers = conn.execute(
-                "SELECT question_key, score FROM evaluation_answer WHERE evaluation_id = %(id)s",
-                {"id": row["id"]},
-            ).fetchall()
-            result.append(
-                EvaluationHistoryOut(
-                    id=row["id"],
-                    leader_id=row["leader_id"],
-                    leader_name=row["leader_name"],
-                    week_key=row["week_key"],
-                    weighted_score=calculate_weighted_score(answers),
-                )
+            if row["id"] not in grouped:
+                grouped[row["id"]] = {
+                    "id": row["id"],
+                    "leader_id": row["leader_id"],
+                    "leader_name": row["leader_name"],
+                    "week_key": row["week_key"],
+                    "answers": [],
+                }
+                order.append(row["id"])
+            grouped[row["id"]]["answers"].append(
+                {"question_key": row["question_key"], "score": row["score"]}
             )
-        return result
+
+        return [
+            EvaluationHistoryOut(
+                id=grouped[eid]["id"],
+                leader_id=grouped[eid]["leader_id"],
+                leader_name=grouped[eid]["leader_name"],
+                week_key=grouped[eid]["week_key"],
+                weighted_score=calculate_weighted_score(grouped[eid]["answers"]),
+            )
+            for eid in order
+        ]
