@@ -5,6 +5,7 @@ from fastapi.responses import JSONResponse
 
 from app.core.exceptions import (
     EmployeeNotFoundError,
+    NoCurrentEvaluationError,
     NotSubordinateError,
     SelfEvaluationError,
 )
@@ -26,6 +27,10 @@ def register_exception_handlers(app: FastAPI) -> None:
     @app.exception_handler(EmployeeNotFoundError)
     def handle_employee_not_found(request: Request, exc: EmployeeNotFoundError) -> JSONResponse:
         return JSONResponse(status_code=404, content={"detail": "Funcionário não encontrado."})
+        
+    @app.exception_handler(NoCurrentEvaluationError)
+    def handle_no_current_evaluation(request: Request, exc: NoCurrentEvaluationError) -> JSONResponse:
+        return JSONResponse(status_code=404, content={"detail": "Nenhuma avaliação encontrada para esta semana."})
     
     @app.exception_handler(Exception)
     def handle_unexpected_error(request: Request, exc: Exception) -> JSONResponse:
