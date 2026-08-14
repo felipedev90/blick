@@ -21,17 +21,17 @@ def get_team(leader_id: int) -> list[TeamMemberOut]:
     """Retorna todos os liderados diretos e indiretos de um líder."""
     query = """
         WITH RECURSIVE subordinates AS (
-            SELECT lead_id, 1 AS depth
+            SELECT lead_id, leader_id AS parent_id, 1 AS depth
             FROM leader_lead
             WHERE leader_id = %(leader_id)s
 
             UNION ALL
 
-            SELECT ll.lead_id, s.depth + 1
+            SELECT ll.lead_id, ll.leader_id AS parent_id, s.depth + 1
             FROM leader_lead ll
             INNER JOIN subordinates s ON ll.leader_id = s.lead_id
         )
-        SELECT e.id, e.name, e.position_name, s.depth
+        SELECT e.id, e.name, e.position_name, s.depth, s.parent_id
         FROM subordinates s
         INNER JOIN employee e ON e.id = s.lead_id
         ORDER BY s.depth, e.name

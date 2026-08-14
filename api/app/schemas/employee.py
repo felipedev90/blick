@@ -16,3 +16,4 @@ class TeamMemberOut(BaseModel):
     name: str
     position_name: str
     depth: int
+    parent_id: int
