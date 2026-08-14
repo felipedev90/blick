@@ -3,7 +3,11 @@ import logging
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
-from app.core.hierarchy import NotSubordinateError, SelfEvaluationError
+from app.core.exceptions import (
+    EmployeeNotFoundError,
+    NotSubordinateError,
+    SelfEvaluationError,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -18,6 +22,10 @@ def register_exception_handlers(app: FastAPI) -> None:
     @app.exception_handler(NotSubordinateError)
     def handle_not_subordinate(request: Request, exc: NotSubordinateError) -> JSONResponse:
         return JSONResponse(status_code=403, content={"detail": "Funcionário fora da sua hierarquia."})
+    
+    @app.exception_handler(EmployeeNotFoundError)
+    def handle_employee_not_found(request: Request, exc: EmployeeNotFoundError) -> JSONResponse:
+        return JSONResponse(status_code=404, content={"detail": "Funcionário não encontrado."})
     
     @app.exception_handler(Exception)
     def handle_unexpected_error(request: Request, exc: Exception) -> JSONResponse:
