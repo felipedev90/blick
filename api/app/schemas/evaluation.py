@@ -13,6 +13,12 @@ class EvaluationIn(BaseModel):
     answers: list[AnswerIn]
     
     
+class AnswerOut(BaseModel):
+    """Uma resposta dentro da avaliação retornada pela API."""
+    question_key: str
+    score: int
+
+
 class EvaluationSummaryOut(BaseModel):
     """Avaliação vigente de um funcionário, já considerando a maior hierarquia."""
     id: int
@@ -20,7 +26,7 @@ class EvaluationSummaryOut(BaseModel):
     leader_name: str
     week_key: str
     weighted_score: float
-    answers: list[AnswerIn]
+    answers: list[AnswerOut]
 
 
 class EvaluationHistoryOut(BaseModel):
