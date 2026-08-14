@@ -15,6 +15,7 @@ def list_employees() -> list[EmployeeOut]:
         ).fetchall()
     return rows
 
+
 @router.get("/{leader_id}/team", response_model=list[TeamMemberOut])
 def get_team(leader_id: int) -> list[TeamMemberOut]:
     """Retorna todos os liderados diretos e indiretos de um líder."""

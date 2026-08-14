@@ -1,4 +1,4 @@
-""" lê DATABASE_URL do .env via Pydantic Settings"""
+"""lê DATABASE_URL do .env via Pydantic Settings"""
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
