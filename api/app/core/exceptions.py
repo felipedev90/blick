@@ -8,3 +8,7 @@ class NotSubordinateError(Exception):
 
 class EmployeeNotFoundError(Exception):
     """Levantado quando um employee_id ou leader_id não existe."""
+    
+
+class NoCurrentEvaluationError(Exception):
+    """Levantado quando o funcionário ainda não possui avaliação na semana atual."""

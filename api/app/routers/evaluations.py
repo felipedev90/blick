@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException, status
 from psycopg.errors import UniqueViolation
 
+from app.core.exceptions import NoCurrentEvaluationError
 from app.core.hierarchy import ensure_can_evaluate, get_depths_from_top
 from app.core.questions import QUESTION_WEIGHTS, calculate_weighted_score
 from app.database import get_connection
@@ -57,7 +58,7 @@ def create_evaluation(employee_id: int, payload: EvaluationIn) -> dict[str, int]
 
     return {"id": evaluation_id}
 
-@router.get("/{employee_id}/evaluations/current", response_model=EvaluationSummaryOut | None)
+@router.get("/{employee_id}/evaluations/current", response_model=EvaluationSummaryOut)
 def get_current_evaluation(employee_id: int, viewer_id: int):
     """Retorna a avaliação vigente da semana atual, priorizando o líder
     mais próximo do topo da hierarquia quando há mais de uma."""
@@ -76,7 +77,7 @@ def get_current_evaluation(employee_id: int, viewer_id: int):
         ).fetchall()
 
         if not candidates:
-            return None
+            raise NoCurrentEvaluationError()
 
         leader_ids = [c["leader_id"] for c in candidates]
         depths = get_depths_from_top(conn, leader_ids)
