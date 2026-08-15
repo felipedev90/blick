@@ -1,14 +1,19 @@
 import 'server-only'
 
 import type { Employee, TeamMember, TeamMemberEvaluation } from '@/types/employee'
-import type { EvaluationHistoryEntry, EvaluationInput, EvaluationSummary } from '@/types/evaluation'
-
+import type {
+  EvaluationHistoryEntry,
+  EvaluationInput,
+  EvaluationSummary,
+  LeaderEvaluationHistoryEntry,
+} from '@/types/evaluation'
 import {
   toEmployee,
   toEvaluationSummary,
   toHistoryEntry,
   toTeamMember,
   toTeamMemberEvaluation,
+  toLeaderEvaluationHistoryEntry,
 } from './adapters'
 import type {
   RawEmployee,
@@ -16,6 +21,7 @@ import type {
   RawEvaluationSummary,
   RawTeamMember,
   RawTeamMemberEvaluation,
+  RawLeaderEvaluationHistoryEntry,
 } from './adapters'
 import { ApiError } from './errors'
 
@@ -141,4 +147,14 @@ export async function getTeamEvaluations(leaderId: number): Promise<TeamMemberEv
     cache: 'no-store',
   })
   return raw.map(toTeamMemberEvaluation)
+}
+
+export async function getLeaderEvaluationsGiven(
+  leaderId: number,
+): Promise<LeaderEvaluationHistoryEntry[]> {
+  const raw = await apiFetch<RawLeaderEvaluationHistoryEntry[]>(
+    `/employees/${leaderId}/evaluations/given`,
+    { cache: 'no-store' },
+  )
+  return raw.map(toLeaderEvaluationHistoryEntry)
 }

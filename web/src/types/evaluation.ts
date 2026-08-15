@@ -20,3 +20,11 @@ export type EvaluationHistoryEntry = {
 export type EvaluationInput = {
   answers: Answer[]
 }
+
+export type LeaderEvaluationHistoryEntry = {
+  id: number
+  employeeId: number
+  employeeName: string
+  weekKey: string
+  weightedScore: number
+}

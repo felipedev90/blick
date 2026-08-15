@@ -1,8 +1,11 @@
 import type { Employee, TeamMember, TeamMemberEvaluation } from '@/types/employee'
-import type { EvaluationHistoryEntry, EvaluationSummary } from '@/types/evaluation'
+import type {
+  EvaluationHistoryEntry,
+  EvaluationSummary,
+  LeaderEvaluationHistoryEntry,
+} from '@/types/evaluation'
 import type { Answer, QuestionKey, Score } from '@/types/question'
 
-// Shapes crus da API (snake_case). Não são reexportados pelo barrel: não vazam do módulo.
 export type RawEmployee = {
   id: number
   name: string
@@ -44,6 +47,14 @@ export type RawTeamMemberEvaluation = RawTeamMember & {
   weighted_score: number | null
 }
 
+export type RawLeaderEvaluationHistoryEntry = {
+  id: number
+  employee_id: number
+  employee_name: string
+  week_key: string
+  weighted_score: number
+}
+
 export function toEmployee(raw: RawEmployee): Employee {
   return { id: raw.id, name: raw.name, positionName: raw.position_name }
 }
@@ -83,6 +94,18 @@ export function toTeamMemberEvaluation(raw: RawTeamMemberEvaluation): TeamMember
     evaluationId: raw.evaluation_id,
     evaluationLeaderId: raw.evaluation_leader_id,
     evaluationLeaderName: raw.evaluation_leader_name,
+    weekKey: raw.week_key,
+    weightedScore: raw.weighted_score,
+  }
+}
+
+export function toLeaderEvaluationHistoryEntry(
+  raw: RawLeaderEvaluationHistoryEntry,
+): LeaderEvaluationHistoryEntry {
+  return {
+    id: raw.id,
+    employeeId: raw.employee_id,
+    employeeName: raw.employee_name,
     weekKey: raw.week_key,
     weightedScore: raw.weighted_score,
   }
