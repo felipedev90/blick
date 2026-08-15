@@ -1,5 +1,5 @@
 {
-  "name": "nextjs-template",
+  "name": "blick",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -11,6 +11,7 @@
     "typecheck": "tsc --noEmit",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
+    "test": "vitest run",
     "prepare": "husky"
   },
   "dependencies": {
@@ -38,7 +39,8 @@
     "lint-staged": "^15.2.10",
     "prettier": "^3.3.3",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^4.1.10"
   },
   "lint-staged": {
     "*.{ts,tsx}": [
