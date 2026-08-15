@@ -36,3 +36,9 @@ export async function POST(request: Request) {
 
   return NextResponse.json({ leaderId: leader.id })
 }
+
+export async function DELETE() {
+  const store = await cookies()
+  store.delete(LEADER_COOKIE)
+  return NextResponse.json({ leaderId: null })
+}

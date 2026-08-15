@@ -23,8 +23,6 @@ export function LeaderSelector({ employees, currentLeaderId, className }: Leader
   const [selectedId, setSelectedId] = useState<number | null>(currentLeaderId)
   const [error, setError] = useState<string | null>(null)
 
-  // Guarda a última seleção pedida. Se uma resposta antiga chegar depois
-  // de uma mais nova, ela é descartada em vez de sobrescrever o estado.
   const latestRequestId = useRef<number | null>(null)
 
   async function handleChange(event: React.ChangeEvent<HTMLSelectElement>) {
@@ -66,6 +64,29 @@ export function LeaderSelector({ employees, currentLeaderId, className }: Leader
     }
   }
 
+  async function handleClear() {
+    setError(null)
+    setIsSubmitting(true)
+
+    try {
+      const res = await fetch('/api/leader', { method: 'DELETE' })
+
+      if (!res.ok) {
+        setError('Não foi possível trocar de líder.')
+        return
+      }
+
+      setSelectedId(null)
+      startTransition(() => {
+        router.refresh()
+      })
+    } catch {
+      setError('Falha de conexão.')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
   return (
     <div className={cn('flex flex-col gap-2', className)}>
       <label htmlFor="leader-select" className="text-sm text-text-muted">
@@ -87,6 +108,16 @@ export function LeaderSelector({ employees, currentLeaderId, className }: Leader
           </option>
         ))}
       </select>
+      {selectedId !== null ? (
+        <button
+          type="button"
+          onClick={handleClear}
+          disabled={isSubmitting || isPending}
+          className="text-left text-xs text-text-muted underline-offset-2 hover:text-text hover:underline cursor-pointer"
+        >
+          Trocar líder
+        </button>
+      ) : null}
       {error ? (
         <p role="alert" className="text-sm text-red-500">
           {error}
