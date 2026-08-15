@@ -8,6 +8,7 @@ from app.schemas.employee import (
     TeamMemberEvaluationOut,
     TeamMemberOut,
 )
+from app.schemas.evaluation import LeaderEvaluationHistoryOut
 
 router = APIRouter(prefix="/employees", tags=["employees"])
 
@@ -130,6 +131,59 @@ def get_team_evaluations(leader_id: int) -> list[TeamMemberEvaluationOut]:
             LEFT JOIN current_week cw ON cw.employee_id = e.id
             LEFT JOIN employee leader ON leader.id = cw.leader_id
             ORDER BY s.depth, e.name
+        """
+        rows = conn.execute(
+            query,
+            {
+                "leader_id": leader_id,
+                "question_keys": list(QUESTION_WEIGHTS.keys()),
+                "weight_values": list(QUESTION_WEIGHTS.values()),
+            },
+        ).fetchall()
+    return rows
+
+
+@router.get(
+    "/{leader_id}/evaluations/given",
+    response_model=list[LeaderEvaluationHistoryOut],
+)
+def get_leader_evaluations_history(leader_id: int) -> list[LeaderEvaluationHistoryOut]:
+    """Todas as avaliações já feitas por esse líder, mais recente primeiro."""
+    with get_connection() as conn:
+        ensure_employee_exists(conn, leader_id)
+
+        query = """
+            WITH weights (question_key, weight) AS (
+                SELECT * FROM unnest(
+                    %(question_keys)s::text[],
+                    %(weight_values)s::int[]
+                )
+            ),
+            scored AS (
+                SELECT
+                    ev.id AS evaluation_id,
+                    ROUND(
+                        (SUM(ans.score * w.weight)::numeric
+                         / (4 * SUM(w.weight))) * 100,
+                        2
+                    ) AS weighted_score
+                FROM evaluation ev
+                INNER JOIN evaluation_answer ans ON ans.evaluation_id = ev.id
+                INNER JOIN weights w ON w.question_key = ans.question_key
+                WHERE ev.leader_id = %(leader_id)s
+                GROUP BY ev.id
+            )
+            SELECT
+                ev.id,
+                ev.employee_id,
+                e.name AS employee_name,
+                ev.week_key,
+                sc.weighted_score
+            FROM evaluation ev
+            INNER JOIN employee e ON e.id = ev.employee_id
+            INNER JOIN scored sc ON sc.evaluation_id = ev.id
+            WHERE ev.leader_id = %(leader_id)s
+            ORDER BY ev.created_at DESC
         """
         rows = conn.execute(
             query,

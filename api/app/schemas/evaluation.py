@@ -52,3 +52,13 @@ class EvaluationHistoryOut(BaseModel):
     leader_name: str
     week_key: str
     weighted_score: float
+
+
+class LeaderEvaluationHistoryOut(BaseModel):
+    """Uma avaliação feita pelo líder consultado, com o nome de quem foi avaliado."""
+
+    id: int
+    employee_id: int
+    employee_name: str
+    week_key: str
+    weighted_score: float
