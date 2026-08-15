@@ -9,6 +9,7 @@ const NAV_ITEMS = [
   { href: '/', label: 'Avaliações do time' },
   { href: '/team', label: 'Meu time' },
   { href: '/history', label: 'Histórico' },
+  { href: '/profile', label: 'Avaliação de Perfil' },
 ] as const
 
 export function NavLinks() {
