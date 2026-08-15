@@ -26,7 +26,7 @@ export function TeamTree({ nodes, isRoot = true }: TeamTreeProps) {
           style={{ animationDelay: `${Math.min(index, 8) * 40}ms` }}
         >
           <Link
-            href={`/team/${node.id}/evaluate`}
+            href={`/team/${node.id}`}
             className="relative flex items-center gap-3 rounded-md px-2 py-2 transition-colors duration-300 hover:bg-surface"
           >
             {!isRoot && (
