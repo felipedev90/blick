@@ -8,6 +8,7 @@ import { cn } from '@/lib/cn'
 const NAV_ITEMS = [
   { href: '/', label: 'Avaliações do time' },
   { href: '/team', label: 'Meu time' },
+  { href: '/history', label: 'Histórico' },
 ] as const
 
 export function NavLinks() {

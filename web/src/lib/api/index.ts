@@ -3,6 +3,7 @@ export {
   getCurrentEvaluation,
   getEmployees,
   getEvaluationHistory,
+  getLeaderEvaluationsGiven,
   getTeam,
   getTeamEvaluations,
 } from './client'
