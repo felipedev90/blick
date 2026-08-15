@@ -2,6 +2,7 @@ import { getLeaderId } from '@/lib/leader'
 import { getTeamEvaluations } from '@/lib/api'
 import { calculateDashboardStats } from '@/lib/dashboard'
 import { StatCard } from '@/components/ui/StatCard'
+import { EvaluatedList } from '@/components/sections/EvaluatedList'
 import { ScoreDistribution } from '@/components/sections/ScoreDistribution'
 import { PendingList } from '@/components/sections/PendingList'
 
@@ -56,6 +57,11 @@ export default async function HomePage() {
       <section className="flex flex-col gap-3">
         <h2 className="font-sans text-sm font-semibold text-text">Pendentes</h2>
         <PendingList members={stats.pendingMembers} />
+      </section>
+
+      <section className="flex flex-col gap-3">
+        <h2 className="font-sans text-sm font-semibold text-text">Avaliados</h2>
+        <EvaluatedList members={stats.evaluatedMembers} />
       </section>
     </main>
   )

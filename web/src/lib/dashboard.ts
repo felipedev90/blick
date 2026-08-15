@@ -10,6 +10,7 @@ export type ScoreBucket = {
 export type DashboardStats = {
   total: number
   evaluatedCount: number
+  evaluatedMembers: TeamMemberEvaluation[]
   pendingMembers: TeamMemberEvaluation[]
   averageScore: number | null
   distribution: ScoreBucket[]
@@ -49,6 +50,7 @@ export function calculateDashboardStats(team: TeamMemberEvaluation[]): Dashboard
   return {
     total: team.length,
     evaluatedCount: evaluated.length,
+    evaluatedMembers: evaluated,
     pendingMembers,
     averageScore,
     distribution,
