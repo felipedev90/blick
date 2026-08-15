@@ -1,3 +1,5 @@
+import Link from 'next/link'
+
 import { cn } from '@/lib/cn'
 import type { TreeNode } from '@/lib/tree'
 import type { TeamMember } from '@/types/employee'
@@ -23,7 +25,10 @@ export function TeamTree({ nodes, isRoot = true }: TeamTreeProps) {
           className="opacity-0 animate-[fade-in_300ms_ease_forwards]"
           style={{ animationDelay: `${Math.min(index, 8) * 40}ms` }}
         >
-          <div className="relative flex items-center gap-3 rounded-md px-2 py-2 transition-colors duration-300 hover:bg-surface">
+          <Link
+            href={`/team/${node.id}/evaluate`}
+            className="relative flex items-center gap-3 rounded-md px-2 py-2 transition-colors duration-300 hover:bg-surface"
+          >
             {!isRoot && (
               <span
                 aria-hidden="true"
@@ -43,7 +48,7 @@ export function TeamTree({ nodes, isRoot = true }: TeamTreeProps) {
                 {node.positionName}
               </span>
             </div>
-          </div>
+          </Link>
           {node.children.length > 0 && <TeamTree nodes={node.children} isRoot={false} />}
         </li>
       ))}
