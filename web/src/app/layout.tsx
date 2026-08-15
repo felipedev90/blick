@@ -1,8 +1,10 @@
 import type { Metadata } from 'next'
 import { IBM_Plex_Mono, Instrument_Sans } from 'next/font/google'
 
-import { ThemeToggle } from '@/components/ui/ThemeToggle'
+import { Navbar } from '@/components/layout/Navbar'
 import { cn } from '@/lib/cn'
+import { getEmployees } from '@/lib/api'
+import { getLeaderId } from '@/lib/leader'
 import { getTheme } from '@/lib/theme'
 
 import './globals.css'
@@ -26,7 +28,12 @@ export const metadata: Metadata = {
 }
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const theme = await getTheme()
+  const [theme, employees, leaderId] = await Promise.all([
+    getTheme(),
+    getEmployees(),
+    getLeaderId(),
+  ])
+  const currentLeader = employees.find((employee) => employee.id === leaderId) ?? null
 
   return (
     <html
@@ -35,9 +42,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       className={cn(instrumentSans.variable, plexMono.variable)}
     >
       <body>
-        <header className="flex justify-end p-4">
-          <ThemeToggle initialTheme={theme} />
-        </header>
+        <Navbar leaderName={currentLeader?.name ?? null} theme={theme} />
         {children}
       </body>
     </html>
