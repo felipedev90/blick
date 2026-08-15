@@ -81,3 +81,8 @@ def test_history_lists_all_evaluations(clean_evaluations):
 
     assert response.status_code == 200
     assert len(response.json()) == 1
+
+
+def test_get_team_404_for_nonexistent_leader(clean_evaluations):
+    response = client.get("/employees/9999/team")
+    assert response.status_code == 404

@@ -2,7 +2,15 @@ import pytest
 
 from app.database import get_connection
 
-TEST_EMPLOYEE_IDS = (15, 18, 19)  # Olivia, Rachel, Samuel: reservados pros testes
+TEST_EMPLOYEE_IDS = (
+    15,
+    18,
+    19,  # Olivia, Rachel, Samuel: árvore do Frank/Carol
+    4,
+    8,
+    10,
+    12,  # David, Henry, James, Liam: árvore do Bob, usados em testes de hierarquia/time
+)
 
 
 @pytest.fixture
