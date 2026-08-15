@@ -1,10 +1,9 @@
 import type { Metadata } from 'next'
 import { IBM_Plex_Mono, Instrument_Sans } from 'next/font/google'
 
-import { Navbar } from '@/components/layout/Navbar'
+import { Sidebar } from '@/components/layout/Sidebar'
 import { cn } from '@/lib/cn'
-import { getEmployees } from '@/lib/api'
-import { getLeaderId } from '@/lib/leader'
+
 import { getTheme } from '@/lib/theme'
 
 import './globals.css'
@@ -28,12 +27,7 @@ export const metadata: Metadata = {
 }
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const [theme, employees, leaderId] = await Promise.all([
-    getTheme(),
-    getEmployees(),
-    getLeaderId(),
-  ])
-  const currentLeader = employees.find((employee) => employee.id === leaderId) ?? null
+  const theme = await getTheme()
 
   return (
     <html
@@ -42,8 +36,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       className={cn(instrumentSans.variable, plexMono.variable)}
     >
       <body>
-        <Navbar leaderName={currentLeader?.name ?? null} theme={theme} />
-        {children}
+        <div className="flex">
+          <Sidebar />
+          <main className="flex-1 overflow-y-auto">{children}</main>
+        </div>
       </body>
     </html>
   )
