@@ -1,4 +1,4 @@
-import type { Employee, TeamMember } from '@/types/employee'
+import type { Employee, TeamMember, TeamMemberEvaluation } from '@/types/employee'
 import type { EvaluationHistoryEntry, EvaluationSummary } from '@/types/evaluation'
 import type { Answer, QuestionKey, Score } from '@/types/question'
 
@@ -36,6 +36,14 @@ export type RawEvaluationHistoryEntry = {
   weighted_score: number
 }
 
+export type RawTeamMemberEvaluation = RawTeamMember & {
+  evaluation_id: number | null
+  evaluation_leader_id: number | null
+  evaluation_leader_name: string | null
+  week_key: string | null
+  weighted_score: number | null
+}
+
 export function toEmployee(raw: RawEmployee): Employee {
   return { id: raw.id, name: raw.name, positionName: raw.position_name }
 }
@@ -64,6 +72,17 @@ export function toHistoryEntry(raw: RawEvaluationHistoryEntry): EvaluationHistor
     id: raw.id,
     leaderId: raw.leader_id,
     leaderName: raw.leader_name,
+    weekKey: raw.week_key,
+    weightedScore: raw.weighted_score,
+  }
+}
+
+export function toTeamMemberEvaluation(raw: RawTeamMemberEvaluation): TeamMemberEvaluation {
+  return {
+    ...toTeamMember(raw),
+    evaluationId: raw.evaluation_id,
+    evaluationLeaderId: raw.evaluation_leader_id,
+    evaluationLeaderName: raw.evaluation_leader_name,
     weekKey: raw.week_key,
     weightedScore: raw.weighted_score,
   }
