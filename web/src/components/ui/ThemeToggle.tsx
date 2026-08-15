@@ -56,7 +56,7 @@ export function ThemeToggle({ initialTheme, className }: ThemeToggleProps) {
       onClick={handleClick}
       aria-label={theme === 'light' ? 'Ativar modo escuro' : 'Ativar modo claro'}
       className={cn(
-        'inline-flex h-9 w-9 items-center justify-center rounded-full border border-border text-text transition-colors duration-300 hover:border-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent',
+        'inline-flex h-9 w-9 items-center justify-center rounded-full border border-border text-text transition-colors duration-300 hover:border-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent cursor-pointer',
         className,
       )}
     >
