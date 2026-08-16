@@ -27,11 +27,16 @@ def test_leader_history_lists_own_evaluations(clean_evaluations):
     create_evaluation(leader_id=4, employee_id=8)
     create_evaluation(leader_id=4, employee_id=10)
 
-    response = client.get("/employees/4/evaluations/given")
+    response = client.get("/employees/4/evaluations/given?viewer_id=4")
 
     assert response.status_code == 200
     employee_ids = {entry["employee_id"] for entry in response.json()}
     assert employee_ids == {8, 10}
+
+
+def test_leader_history_rejects_unrelated_viewer(clean_evaluations):
+    response = client.get("/employees/4/evaluations/given?viewer_id=3")
+    assert response.status_code == 403
 
 
 def test_leader_history_excludes_other_leaders(clean_evaluations):
@@ -39,18 +44,18 @@ def test_leader_history_excludes_other_leaders(clean_evaluations):
     mesmo que Henry seja subordinado do David."""
     create_evaluation(leader_id=8, employee_id=10)
 
-    response = client.get("/employees/4/evaluations/given")
+    response = client.get("/employees/4/evaluations/given?viewer_id=4")
 
     assert response.status_code == 200
     assert response.json() == []
 
 
 def test_leader_history_empty_when_no_evaluations(clean_evaluations):
-    response = client.get("/employees/12/evaluations/given")
+    response = client.get("/employees/12/evaluations/given?viewer_id=12")
     assert response.status_code == 200
     assert response.json() == []
 
 
 def test_leader_history_404_for_nonexistent_leader(clean_evaluations):
-    response = client.get("/employees/9999/evaluations/given")
+    response = client.get("/employees/9999/evaluations/given?viewer_id=1")
     assert response.status_code == 404

@@ -37,7 +37,7 @@ def test_team_evaluations_prioritizes_top_of_hierarchy(clean_evaluations):
     create_evaluation(leader_id=8, employee_id=10, answers=LOW_ANSWERS)
     create_evaluation(leader_id=4, employee_id=10, answers=FULL_ANSWERS)
 
-    response = client.get("/employees/2/team/evaluations")
+    response = client.get("/employees/2/team/evaluations?viewer_id=2")
 
     assert response.status_code == 200
     james = next(member for member in response.json() if member["id"] == 10)
@@ -45,10 +45,27 @@ def test_team_evaluations_prioritizes_top_of_hierarchy(clean_evaluations):
     assert james["weighted_score"] == 88.75
 
 
+def test_team_evaluations_rejects_unrelated_viewer(clean_evaluations):
+    """Carol (3) não é o Bob nem superior dele, não pode consultar o time do Bob."""
+    response = client.get("/employees/2/team/evaluations?viewer_id=3")
+    assert response.status_code == 403
+
+
+def test_team_evaluations_allows_self(clean_evaluations):
+    response = client.get("/employees/2/team/evaluations?viewer_id=2")
+    assert response.status_code == 200
+
+
+def test_team_evaluations_allows_superior(clean_evaluations):
+    """Alice (1) é CEO, superior do Bob (2), pode consultar o time dele."""
+    response = client.get("/employees/2/team/evaluations?viewer_id=1")
+    assert response.status_code == 200
+
+
 def test_team_evaluations_includes_pending_members(clean_evaluations):
     """Funcionário sem avaliação nesta semana aparece na lista com campos
     nulos, não é omitido da resposta."""
-    response = client.get("/employees/2/team/evaluations")
+    response = client.get("/employees/2/team/evaluations?viewer_id=2")
 
     assert response.status_code == 200
     grace = next(member for member in response.json() if member["id"] == 7)
@@ -61,7 +78,7 @@ def test_team_evaluations_scoped_to_subordinates(clean_evaluations):
     mesmo que essa pessoa tenha avaliação vigente em outro time."""
     create_evaluation(leader_id=2, employee_id=8, answers=FULL_ANSWERS)
 
-    response = client.get("/employees/6/team/evaluations")
+    response = client.get("/employees/6/team/evaluations?viewer_id=6")
 
     assert response.status_code == 200
     ids = [member["id"] for member in response.json()]
@@ -69,14 +86,14 @@ def test_team_evaluations_scoped_to_subordinates(clean_evaluations):
 
 
 def test_team_evaluations_404_for_nonexistent_leader(clean_evaluations):
-    response = client.get("/employees/9999/team/evaluations")
+    response = client.get("/employees/9999/team/evaluations?viewer_id=1")
     assert response.status_code == 404
 
 
 def test_team_evaluations_empty_when_no_subordinates(clean_evaluations):
     """Funcionário sem ninguém abaixo na hierarquia recebe lista vazia,
     não erro."""
-    response = client.get("/employees/11/team/evaluations")
+    response = client.get("/employees/11/team/evaluations?viewer_id=11")
 
     assert response.status_code == 200
     assert response.json() == []

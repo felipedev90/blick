@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from app.core.hierarchy import ensure_employee_exists
+from app.core.hierarchy import ensure_can_view_team, ensure_employee_exists
 from app.core.questions import QUESTION_WEIGHTS
 from app.database import get_connection
 from app.schemas.employee import (
@@ -53,10 +53,12 @@ def get_team(leader_id: int) -> list[TeamMemberOut]:
     "/{leader_id}/team/evaluations",
     response_model=list[TeamMemberEvaluationOut],
 )
-def get_team_evaluations(leader_id: int) -> list[TeamMemberEvaluationOut]:
+def get_team_evaluations(
+    leader_id: int, viewer_id: int
+) -> list[TeamMemberEvaluationOut]:
     """Time completo do líder com a avaliação vigente de cada membro na semana atual."""
     with get_connection() as conn:
-        ensure_employee_exists(conn, leader_id)
+        ensure_can_view_team(conn, viewer_id, leader_id)
         query = """
             WITH RECURSIVE subordinates AS (
                 SELECT lead_id, leader_id AS parent_id, 1 AS depth
@@ -147,10 +149,12 @@ def get_team_evaluations(leader_id: int) -> list[TeamMemberEvaluationOut]:
     "/{leader_id}/evaluations/given",
     response_model=list[LeaderEvaluationHistoryOut],
 )
-def get_leader_evaluations_history(leader_id: int) -> list[LeaderEvaluationHistoryOut]:
+def get_leader_evaluations_history(
+    leader_id: int, viewer_id: int
+) -> list[LeaderEvaluationHistoryOut]:
     """Todas as avaliações já feitas por esse líder, mais recente primeiro."""
     with get_connection() as conn:
-        ensure_employee_exists(conn, leader_id)
+        ensure_can_view_team(conn, viewer_id, leader_id)
 
         query = """
             WITH weights (question_key, weight) AS (

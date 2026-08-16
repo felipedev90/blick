@@ -49,6 +49,17 @@ def ensure_can_evaluate(conn: Connection, leader_id: int, employee_id: int) -> N
         raise NotSubordinateError()
 
 
+def ensure_can_view_team(conn: Connection, viewer_id: int, leader_id: int) -> None:
+    """Valida se viewer_id pode consultar o time/histórico de leader_id.
+    Só o próprio líder ou alguém acima dele na hierarquia tem acesso."""
+    ensure_employee_exists(conn, viewer_id)
+    ensure_employee_exists(conn, leader_id)
+    if viewer_id == leader_id:
+        return
+    if not is_subordinate(conn, leader_id=viewer_id, employee_id=leader_id):
+        raise NotSubordinateError()
+
+
 def get_depths_from_top(conn: Connection, leader_ids: list[int]) -> dict[int, int]:
     """Calcula, em uma única consulta, a profundidade de cada leader_id
     a partir da raiz da hierarquia (quem não tem líder = depth 0).
