@@ -9,6 +9,7 @@ import { QUESTIONS } from '@/data/questions'
 import { evaluationFormSchema } from '@/lib/schemas/evaluation'
 import type { EvaluationFormValues } from '@/lib/schemas/evaluation'
 import type { Score } from '@/types/question'
+import { Button } from '@/components/ui/Button'
 
 type EvaluationFormProps = {
   employeeId: number
@@ -80,13 +81,9 @@ export function EvaluationForm({ employeeId }: EvaluationFormProps) {
         </p>
       ) : null}
 
-      <button
-        type="submit"
-        disabled={isSubmitting}
-        className="rounded-md bg-accent/80 px-4 py-2 text-sm font-semibold text-bg/80 cursor-pointer transition-colors duration-300 disabled:opacity-50 hover:bg-accent hover:text-bg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
-      >
+      <Button type="submit" disabled={isSubmitting}>
         {isSubmitting ? 'Enviando avaliação...' : 'Enviar avaliação'}
-      </button>
+      </Button>
     </form>
   )
 }
