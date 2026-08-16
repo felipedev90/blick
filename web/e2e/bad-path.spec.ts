@@ -27,10 +27,10 @@ test('não é possível avaliar a mesma pessoa duas vezes na semana', async ({ p
 test('funcionário fora da hierarquia não é acessível', async ({ page }) => {
   await page.goto('/')
 
-  // Alice (CEO) não é liderada de ninguém, mas Carol (Finanças) não é subordinada
-  // dela na direção que testamos: aqui verificamos que o líder não vê alguém
-  // fora da própria árvore ao tentar acessar a URL diretamente.
-  await page.getByLabel('Avaliando como').selectOption('2')
+  await Promise.all([
+    page.waitForResponse((res) => res.url().includes('/api/leader') && res.ok()),
+    page.getByLabel('Avaliando como').selectOption('2'),
+  ])
 
   // Rachel (18) é liderada da Carol, não do Bob
   await page.goto('/team/18')

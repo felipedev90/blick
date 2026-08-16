@@ -17,8 +17,6 @@ test('líder avalia um funcionário com sucesso', async ({ page }) => {
   const radios = page.getByRole('radio', { name: '4' })
   await expect(radios).toHaveCount(questionCount)
   for (let i = 0; i < questionCount; i++) {
-    // O <input> é sr-only, quem recebe o clique de verdade é o <label> visível
-    // que o envolve. locator.locator('..') sobe pro elemento pai.
     await radios.nth(i).locator('..').click()
   }
 
