@@ -36,7 +36,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       className={cn(instrumentSans.variable, plexMono.variable)}
     >
       <body>
-        <div className="flex">
+        <div className="flex h-screen overflow-hidden">
           <Sidebar />
           <main className="flex-1 overflow-y-auto">{children}</main>
         </div>
