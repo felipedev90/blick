@@ -143,9 +143,10 @@ export async function createEvaluation(
 }
 
 export async function getTeamEvaluations(leaderId: number): Promise<TeamMemberEvaluation[]> {
-  const raw = await apiFetch<RawTeamMemberEvaluation[]>(`/employees/${leaderId}/team/evaluations`, {
-    cache: 'no-store',
-  })
+  const raw = await apiFetch<RawTeamMemberEvaluation[]>(
+    `/employees/${leaderId}/team/evaluations?viewer_id=${leaderId}`,
+    { cache: 'no-store' },
+  )
   return raw.map(toTeamMemberEvaluation)
 }
 
@@ -153,7 +154,7 @@ export async function getLeaderEvaluationsGiven(
   leaderId: number,
 ): Promise<LeaderEvaluationHistoryEntry[]> {
   const raw = await apiFetch<RawLeaderEvaluationHistoryEntry[]>(
-    `/employees/${leaderId}/evaluations/given`,
+    `/employees/${leaderId}/evaluations/given?viewer_id=${leaderId}`,
     { cache: 'no-store' },
   )
   return raw.map(toLeaderEvaluationHistoryEntry)
