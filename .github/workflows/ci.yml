@@ -101,3 +101,88 @@ jobs:
         env:
           DATABASE_URL: postgresql://blick:blick@localhost:5432/blick
         run: poetry run pytest
+
+  e2e-tests:
+    name: E2E tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: blick
+          POSTGRES_PASSWORD: blick
+          POSTGRES_DB: blick
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run database migrations
+        run: |
+          for f in api/db/init/*.sql; do
+            PGPASSWORD=blick psql -h localhost -U blick -d blick -f "$f"
+          done
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Poetry
+        run: pipx install poetry
+
+      - name: Install API dependencies
+        working-directory: api
+        run: poetry install --no-root
+
+      - name: Start API server
+        working-directory: api
+        env:
+          DATABASE_URL: postgresql://blick:blick@localhost:5432/blick
+        run: poetry run uvicorn app.main:app --host 0.0.0.0 --port 8000 &
+
+      - name: Wait for API
+        run: |
+          for i in {1..15}; do
+            curl -sf http://localhost:8000/health && break
+            sleep 2
+          done
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: "npm"
+          cache-dependency-path: web/package-lock.json
+
+      - name: Install web dependencies
+        working-directory: web
+        run: npm ci
+
+      - name: Set API base URL
+        working-directory: web
+        run: echo "API_BASE_URL=http://localhost:8000" > .env.local
+
+      - name: Install Playwright browsers
+        working-directory: web
+        run: npx playwright install --with-deps chromium
+
+      - name: Run E2E tests
+        working-directory: web
+        run: npx playwright test
+
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: web/playwright-report/
+          retention-days: 7
