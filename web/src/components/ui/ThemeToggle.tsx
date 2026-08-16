@@ -3,8 +3,8 @@
 import { Moon, Sun } from 'lucide-react'
 import { useState, useSyncExternalStore } from 'react'
 
-import { cn } from '@/lib/cn'
 import type { Theme } from '@/lib/theme'
+import { Button } from '@/components/ui/Button'
 
 const THEME_COOKIE = 'theme'
 const THEME_COOKIE_MAX_AGE = 60 * 60 * 24 * 365
@@ -51,20 +51,18 @@ export function ThemeToggle({ initialTheme, className }: ThemeToggleProps) {
   }
 
   return (
-    <button
+    <Button
+      variant="icon"
       type="button"
       onClick={handleClick}
       aria-label={theme === 'light' ? 'Ativar modo escuro' : 'Ativar modo claro'}
-      className={cn(
-        'inline-flex h-9 w-9 items-center justify-center rounded-full border border-border text-text transition-colors duration-300 hover:border-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent cursor-pointer',
-        className,
-      )}
+      className={className}
     >
       {theme === 'light' ? (
         <Moon aria-hidden="true" size={16} />
       ) : (
         <Sun aria-hidden="true" size={16} />
       )}
-    </button>
+    </Button>
   )
 }

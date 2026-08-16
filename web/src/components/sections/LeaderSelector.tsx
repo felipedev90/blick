@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import { useRef, useState, useTransition } from 'react'
 
 import { cn } from '@/lib/cn'
+import { Button } from '@/components/ui/Button'
 import type { Employee } from '@/types/employee'
 
 type LeaderSelectorProps = {
@@ -109,14 +110,15 @@ export function LeaderSelector({ employees, currentLeaderId, className }: Leader
         ))}
       </select>
       {selectedId !== null ? (
-        <button
+        <Button
+          variant="ghost"
           type="button"
           onClick={handleClear}
           disabled={isSubmitting || isPending}
-          className="text-left text-xs text-text-muted underline-offset-2 hover:text-text hover:underline cursor-pointer"
+          className="text-right text-xs text-text-muted underline-offset-2 hover:text-text hover:underline cursor-pointer"
         >
           Trocar líder
-        </button>
+        </Button>
       ) : null}
       {error ? (
         <p role="alert" className="text-sm text-red-500">
