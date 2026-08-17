@@ -58,7 +58,7 @@ export function EvaluationForm({ employeeId }: EvaluationFormProps) {
         role="status"
         className="flex flex-col items-center gap-2 rounded-md border border-border bg-surface px-4 py-8 text-center"
       >
-        <span className="text-2xl">✓</span>
+        <span className="text-2xl text-success">✓</span>
         <p className="text-text">Avaliação enviada com sucesso.</p>
       </div>
     )
