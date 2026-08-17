@@ -1,3 +1,5 @@
+import { Metadata } from 'next'
+
 import { EmployeeProfileSelector } from '@/components/sections/EmployeeProfileSelector'
 import { ProfileGrid } from '@/components/sections/ProfileGrid'
 import { getCurrentEvaluation, getTeamEvaluations } from '@/lib/api'
@@ -7,6 +9,10 @@ import { calculateProfile } from '@/lib/profile'
 
 type ProfilePageProps = {
   searchParams: Promise<{ employeeId?: string }>
+}
+
+export const metadata: Metadata = {
+  title: 'Avaliação de Perfil | Blick',
 }
 
 export default async function ProfilePage({ searchParams }: ProfilePageProps) {

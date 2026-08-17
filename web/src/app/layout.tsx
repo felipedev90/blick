@@ -23,7 +23,19 @@ const plexMono = IBM_Plex_Mono({
 
 export const metadata: Metadata = {
   title: 'Blick',
-  description: 'Avaliação de desempenho hierárquica',
+  description:
+    'Plataforma de avaliação de desempenho hierárquica. Líderes avaliam seus liderados diretos e indiretos em critérios ponderados, com histórico e visão consolidada do time.',
+  openGraph: {
+    title: 'Blick',
+    description: 'Plataforma de avaliação de desempenho hierárquica.',
+    type: 'website',
+    locale: 'pt_BR',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Blick',
+    description: 'Plataforma de avaliação de desempenho hierárquica.',
+  },
 }
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {

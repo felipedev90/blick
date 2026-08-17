@@ -1,11 +1,16 @@
 import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
+import { Metadata } from 'next'
 
 import { TeamTree } from '@/components/sections/TeamTree'
 import { getTeam } from '@/lib/api'
 import { getLeaderId } from '@/lib/leader'
 import { buildTree } from '@/lib/tree'
+
+export const metadata: Metadata = {
+  title: 'Meu time | Blick',
+}
 
 export default async function TeamPage() {
   const leaderId = await getLeaderId()

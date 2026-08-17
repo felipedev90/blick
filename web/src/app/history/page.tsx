@@ -1,8 +1,13 @@
 import { redirect } from 'next/navigation'
+import { Metadata } from 'next'
 
 import { LeaderHistoryList } from '@/components/sections/LeaderHistoryList'
 import { getLeaderEvaluationsGiven } from '@/lib/api'
 import { getLeaderId } from '@/lib/leader'
+
+export const metadata: Metadata = {
+  title: 'Histórico | Blick',
+}
 
 export default async function HistoryPage() {
   const leaderId = await getLeaderId()
