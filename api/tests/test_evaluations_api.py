@@ -86,3 +86,24 @@ def test_history_lists_all_evaluations(clean_evaluations):
 def test_get_team_404_for_nonexistent_leader(clean_evaluations):
     response = client.get("/employees/9999/team")
     assert response.status_code == 404
+
+
+def test_indirect_leader_can_evaluate_even_if_subordinate_already_did(
+    clean_evaluations,
+):
+    """Henry (8) é líder direto de James (10) e avalia ele primeiro.
+    David (4), avô do James (líder do Henry) e líder indireto do James,
+    também pode avaliar, mesmo o próprio subordinado (Henry) já tendo
+    avaliado dentro do período. As duas avaliações devem coexistir."""
+    henry_response = create_evaluation(leader_id=8, employee_id=10)
+    assert henry_response.status_code == 201
+
+    david_response = create_evaluation(leader_id=4, employee_id=10)
+    assert david_response.status_code == 201
+
+    assert henry_response.json()["id"] != david_response.json()["id"]
+
+    history_response = client.get("/employees/10/evaluations/history?viewer_id=4")
+    assert history_response.status_code == 200
+    leader_ids = {entry["leader_id"] for entry in history_response.json()}
+    assert leader_ids == {8, 4}
