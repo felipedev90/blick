@@ -1,9 +1,9 @@
-import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
 
 import { CurrentEvaluationCard } from '@/components/sections/CurrentEvaluationCard'
 import { EvaluationForm } from '@/components/sections/EvaluationForm'
-import { getCurrentEvaluation, getEmployees, getTeam } from '@/lib/api'
+import { BackButton } from '@/components/ui/BackButton'
+import { getCurrentEvaluation, getEmployees, getEvaluationHistory, getTeam } from '@/lib/api'
 import { getLeaderId } from '@/lib/leader'
 
 type EmployeeDetailPageProps = {
@@ -18,10 +18,11 @@ export default async function EmployeeDetailPage({ params }: EmployeeDetailPageP
   const leaderId = await getLeaderId()
   if (leaderId === null) redirect('/')
 
-  const [employees, team, currentEvaluation] = await Promise.all([
+  const [employees, team, currentEvaluation, history] = await Promise.all([
     getEmployees(),
     getTeam(leaderId),
     getCurrentEvaluation(employeeId, leaderId),
+    getEvaluationHistory(employeeId, leaderId),
   ])
 
   const employee = employees.find((item) => item.id === employeeId)
@@ -30,13 +31,13 @@ export default async function EmployeeDetailPage({ params }: EmployeeDetailPageP
   const teamMember = team.find((item) => item.id === employeeId)
   const parent = teamMember ? employees.find((item) => item.id === teamMember.parentId) : undefined
 
-  const alreadyEvaluatedByMe = currentEvaluation?.leaderId === leaderId
+  const alreadyEvaluatedByMe = history.some(
+    (entry) => entry.leaderId === leaderId && entry.weekKey === currentEvaluation?.weekKey,
+  )
 
   return (
     <main className="mx-auto flex max-w-md flex-col gap-6 p-6">
-      <Link href="/team" className="flex items-center gap-2 text-text-muted hover:text-text">
-        Voltar
-      </Link>
+      <BackButton />
 
       <div>
         <h1 className="font-sans text-2xl font-semibold text-text">{employee.name}</h1>
