@@ -4,6 +4,14 @@ Plataforma de avaliação de desempenho hierárquica. Um líder avalia seus lide
 (diretos e indiretos) em 6 critérios ponderados, gerando uma nota de 0 a 100 por
 semana.
 
+## Produção
+
+- Frontend: https://blick-nu.vercel.app
+- API: https://blick-qwbk.onrender.com
+- Docs (Swagger): https://blick-qwbk.onrender.com/docs
+
+Vercel (frontend) + Render (API + Postgres, mesma região, rede privada).
+
 ## Stack
 
 | Camada   | Tecnologia                                                            |
@@ -90,6 +98,20 @@ npm run dev
 Abre `http://localhost:3000`.
 
 > **Nota (Windows/monorepo)**: se aparecer aviso do Turbopack sobre múltiplos lockfiles, ou o `npm run dev` travar o sistema ao compilar, confirme que só existe um `package.json`/`node_modules` dentro de `web/`, nunca na raiz do repositório. O `next.config.ts` já fixa `turbopack.root`, mas lockfile duplicado na raiz reintroduz o problema.
+
+### Rodando tudo via Docker (sem hot reload)
+
+Alternativa ao fluxo acima: sobe os três serviços (`db`, `api`, `web`)
+containerizados na mesma rede, sem precisar instalar Node localmente.
+
+```bash
+docker compose up --build
+```
+
+`--build` é obrigatório sempre que o código mudar desde a última vez, `up`
+sozinho reutiliza a imagem já construída e não reflete mudança nenhuma.
+Diferente do `api` (roda com `--reload` e volume montado, reflete mudança na
+hora), o `web` é build de produção estático, precisa reconstruir a imagem.
 
 ### Rodando os testes
 
@@ -275,12 +297,12 @@ ali durante o desenvolvimento: `tree.test.ts` (reconstrução de hierarquia com
 ordenação não-trivial) e `week.test.ts` (aritmética de calendário ISO, que
 tinha bug de timezone real, corrigido depois do teste apontar).
 
-**SEO técnico não implementado por escopo.** `sitemap.ts`, `robots.ts`,
-`opengraph-image.tsx` e JSON-LD Schema.org (convenções padrão do template
-usado como base) não foram adicionados. O Blick é ferramenta interna atrás
-de seleção de líder, sem conteúdo indexável, nenhum usuário chega via busca
-orgânica. `metadata` básico (title, description) permanece no `layout.tsx`
-raiz. Decisão de escopo, não esquecimento.
+**SEO básico implementado, técnico completo fora de escopo.** `metadata`
+com Open Graph/Twitter Card e uma `opengraph-image.tsx` dinâmica (gerada via
+`next/og`) garantem que o link, ao ser compartilhado, mostre título,
+descrição e imagem decentes. `sitemap.ts`, `robots.ts` e JSON-LD Schema.org
+não foram adicionados: o Blick é ferramenta interna atrás de seleção de
+líder, sem conteúdo indexável, nenhum usuário chega via busca orgânica.
 
 ## Checklist do case
 
@@ -316,7 +338,7 @@ raiz. Decisão de escopo, não esquecimento.
 
 **Adicionais (não obrigatórios)**
 
-- [x] 40+ testes automatizados (backend pytest, frontend Vitest, E2E Playwright)
+- [x] 52 testes automatizados (32 backend pytest, 17 frontend Vitest, 3 E2E Playwright)
 - [x] CI completo (lint, format, typecheck, build, testes, E2E) no GitHub Actions
 - [x] Dashboard com indicadores do time (pendentes, avaliados, distribuição de notas)
 - [x] Página de "Avaliação de Perfil" (visualização derivada dos 6 critérios)
