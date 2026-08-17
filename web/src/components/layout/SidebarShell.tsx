@@ -37,8 +37,9 @@ function SidebarShellInner({ children }: SidebarShellProps) {
 
       <aside
         className={cn(
-          'flex h-full shrink-0 flex-col border-l border-border bg-bg transition-all duration-300',
-          isCollapsed ? 'lg:w-0 lg:overflow-hidden lg:border-l-0' : 'lg:w-64',
+          'flex h-full shrink-0 flex-col border-x-0 border-t-0 border-b-0 border-border bg-bg transition-all duration-300',
+          'border-l lg:border-l-0 lg:border-r',
+          isCollapsed ? 'lg:w-0 lg:overflow-hidden lg:border-r-0' : 'lg:w-64',
           'fixed inset-y-0 right-0 z-50 w-64 translate-x-full lg:static lg:translate-x-0',
           isMobileOpen && 'translate-x-0',
         )}
