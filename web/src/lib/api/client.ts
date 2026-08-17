@@ -1,5 +1,7 @@
 import 'server-only'
 
+import { cache } from 'react'
+
 import type { Employee, TeamMember, TeamMemberEvaluation } from '@/types/employee'
 import type {
   EvaluationHistoryEntry,
@@ -78,12 +80,12 @@ async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
   return (await res.json()) as T
 }
 
-export async function getEmployees(): Promise<Employee[]> {
+export const getEmployees = cache(async (): Promise<Employee[]> => {
   const raw = await apiFetch<RawEmployee[]>('/employees', {
     next: { revalidate: 300 },
   })
   return raw.map(toEmployee)
-}
+})
 
 export async function getTeam(leaderId: number): Promise<TeamMember[]> {
   const raw = await apiFetch<RawTeamMember[]>(`/employees/${leaderId}/team`, {

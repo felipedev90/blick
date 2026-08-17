@@ -1,4 +1,5 @@
 import { notFound, redirect } from 'next/navigation'
+import type { Metadata } from 'next'
 
 import { CurrentEvaluationCard } from '@/components/sections/CurrentEvaluationCard'
 import { EvaluationForm } from '@/components/sections/EvaluationForm'
@@ -8,6 +9,17 @@ import { getLeaderId } from '@/lib/leader'
 
 type EmployeeDetailPageProps = {
   params: Promise<{ id: string }>
+}
+
+export async function generateMetadata({ params }: EmployeeDetailPageProps): Promise<Metadata> {
+  const { id } = await params
+  const employeeId = Number(id)
+  const employees = await getEmployees()
+  const employee = employees.find((item) => item.id === employeeId)
+
+  return {
+    title: employee ? `${employee.name} | Blick` : 'Blick',
+  }
 }
 
 export default async function EmployeeDetailPage({ params }: EmployeeDetailPageProps) {
