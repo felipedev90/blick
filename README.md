@@ -70,10 +70,15 @@ DATABASE_URL=postgresql://blick:blick@db:5432/blick
 Na raiz do projeto:
 
 ```bash
-docker compose up
+docker compose up db api
 ```
 
-Isso sobe `db` (Postgres 16) e `api` (FastAPI) na mesma rede. O banco roda os scripts de `api/db/init/` automaticamente na primeira criação (schema + seed de 20 funcionários). Espera aparecer `Uvicorn running on http://0.0.0.0:8000` no log.
+Isso sobe `db` (Postgres 16) e `api` (FastAPI) na mesma rede, sem o `web`
+(que fica pro passo seguinte, rodando via `npm run dev` com hot reload).
+Se quiser subir os três serviços de uma vez, veja a seção
+"Rodando tudo via Docker" mais abaixo. O banco roda os scripts de
+`api/db/init/` automaticamente na primeira criação (schema + seed de 20
+funcionários). Espera aparecer `Uvicorn running on http://0.0.0.0:8000` no log.
 
 Testa: `curl http://localhost:8000/health` deve responder `{"status":"ok"}`.
 
