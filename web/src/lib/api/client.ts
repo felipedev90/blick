@@ -27,6 +27,8 @@ import type {
 } from './adapters'
 import { ApiError } from './errors'
 
+const REQUEST_TIMEOUT_MS = 60_000
+
 function getApiBaseUrl(): string {
   const url = process.env.API_BASE_URL
   if (!url) {
@@ -50,7 +52,7 @@ async function extractErrorDetail(res: Response): Promise<string | null> {
 
 async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
   const controller = new AbortController()
-  const timeout = setTimeout(() => controller.abort(), 8000)
+  const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS)
 
   let res: Response
   try {
