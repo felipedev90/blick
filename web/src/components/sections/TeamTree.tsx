@@ -18,7 +18,9 @@ function initials(name: string): string {
 
 export function TeamTree({ nodes, isRoot = true }: TeamTreeProps) {
   return (
-    <ul className={cn('flex flex-col gap-1 pl-6 ml-6', !isRoot && 'border-l border-border')}>
+    <ul
+      className={cn('flex flex-col gap-1 pl-6 ml-4  md:ml-6', !isRoot && 'border-l border-border')}
+    >
       {nodes.map((node, index) => (
         <li
           key={node.id}
@@ -27,7 +29,7 @@ export function TeamTree({ nodes, isRoot = true }: TeamTreeProps) {
         >
           <Link
             href={`/team/${node.id}`}
-            className="relative flex items-center gap-3 rounded-md px-2 py-2 transition-colors duration-300 hover:bg-surface"
+            className="relative flex items-center gap-3 rounded-md md:px-2 py-2 transition-colors duration-300 hover:bg-surface"
           >
             {!isRoot && (
               <span
