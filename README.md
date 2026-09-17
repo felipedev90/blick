@@ -4,13 +4,19 @@ Plataforma de avaliação de desempenho hierárquica. Um líder avalia seus lide
 (diretos e indiretos) em 6 critérios ponderados, gerando uma nota de 0 a 100 por
 semana.
 
+> **Nota**: API no plano free do Render, Postgres no plano free do Neon.
+> Ambos hibernam por inatividade e podem levar alguns segundos para responder
+> na primeira requisição após um período parado. Um serviço de keep-alive
+> (UptimeRobot) mantém a API ativa; o banco pode levar um instante extra na
+> primeira consulta após inatividade prolongada.
+
 ## Produção
 
 - Frontend: https://blick-nu.vercel.app
 - API: https://blick-qwbk.onrender.com
 - Docs (Swagger): https://blick-qwbk.onrender.com/docs
 
-Vercel (frontend) + Render (API + Postgres, mesma região, rede privada).
+Vercel (frontend) + Render (API) + Neon (Postgres).
 
 ## Stack
 
@@ -350,5 +356,4 @@ líder, sem conteúdo indexável, nenhum usuário chega via busca orgânica.
 
 ## Autor
 
-Desenvolvido por Felipe Augusto como teste técnico para a vaga de Software
-Analyst na Monks.
+Desenvolvido por Felipe Augusto.
